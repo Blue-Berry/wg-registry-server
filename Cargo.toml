@@ -1,0 +1,11 @@
+[package]
+name = "wg-registry-server"
+version = "0.1.0"
+edition = "2021"
+
+# [net]
+# git-fetch-with-cli = true
+
+[dependencies]
+defguard_wireguard_rs = { git = "https://github.com/DefGuard/wireguard-rs.git"}
+x25519-dalek = { version = "2.0.1", features = ["getrandom"] }
