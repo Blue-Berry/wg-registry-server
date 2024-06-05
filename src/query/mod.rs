@@ -1,4 +1,6 @@
 mod endpoint;
+use std::os::unix::net::SocketAddr;
+
 use crate::peers::WG;
 use crate::structure::QueryBody;
 use crate::structure::ResponseBody;

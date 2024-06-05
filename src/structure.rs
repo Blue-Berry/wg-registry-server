@@ -141,8 +141,8 @@ pub enum ResponseBody {
 }
 
 pub enum EndpointBytes {
-    V4([u8; 6]),
-    V6([u8; 18]),
+    V4([u8; 7]),
+    V6([u8; 19]),
 }
 impl ResponseBody {
     pub fn to_bytes(&self) -> EndpointBytes {
@@ -150,18 +150,18 @@ impl ResponseBody {
             ResponseBody::EndpointResponse(ip) => match ip {
                 Some(SocketAddr::V4(socket_addr)) => {
                     let ip_v: u8 = 0;
-                    let port: u8 = socket_addr.port() as u8;
+                    let port: [u8; 2] = socket_addr.port().to_be_bytes();
                     let ip: &[u8; 4] = &socket_addr.ip().octets();
-                    let bytes: [u8; 6] = [ip_v, port, ip[0], ip[1], ip[2], ip[3]];
+                    let bytes: [u8; 7] = [ip_v, port[0], port[1], ip[0], ip[1], ip[2], ip[3]];
                     EndpointBytes::V4(bytes)
                 }
                 Some(SocketAddr::V6(socket_addr)) => {
                     let ip_v: u8 = 1;
-                    let port: u8 = socket_addr.port() as u8;
+                    let port: [u8; 2] = socket_addr.port().to_be_bytes();
                     let ip: &[u8; 16] = &socket_addr.ip().octets();
-                    let bytes: [u8; 18] = [
-                        ip_v, port, ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7], ip[8],
-                        ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15],
+                    let bytes: [u8; 19] = [
+                        ip_v, port[0], port[1], ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6],
+                        ip[7], ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15],
                     ];
                     EndpointBytes::V6(bytes)
                 }

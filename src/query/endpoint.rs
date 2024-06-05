@@ -9,7 +9,6 @@ pub fn endpoint(
     let peer = peers
         .get(key)
         .map(|peer| peer.endpoint)
-        .map_or(None, |endpoint| endpoint)
-        .map_or(None, |endpoint| Some(endpoint));
+        .and_then(|endpoint| endpoint);
     Ok(peer)
 }

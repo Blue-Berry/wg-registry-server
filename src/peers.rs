@@ -10,10 +10,16 @@ pub struct WG(WGApi);
 impl WG {
     pub fn init(ifname: &str) -> Result<Self, WireguardInterfaceError> {
         let wgapi = WGApi::new(ifname.into(), false)?;
+        match wgapi.read_interface_data() {
+            Ok(host) => {
+                println!("{:?}", host);
+                return Ok(Self(wgapi));
+            }
+            Err(e) => {
+                println!("{:?}", e);
+            }
+        }
         wgapi.create_interface()?;
-        let host = wgapi.read_interface_data()?;
-        println!("{:?}", host);
-
         let interface_config = InterfaceConfiguration {
             name: ifname.into(),
             prvkey: "eGzYWppafb7VQ+Z4PUQmzhgNabzzjcbnpMj8FfZDwVQ=".into(),

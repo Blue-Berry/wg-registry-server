@@ -13,11 +13,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
     let mut buf = [0; 512];
 
+    println!("Server listening");
     loop {
         match udp_socket.recv_from(&mut buf) {
             Ok((size, source)) => {
-                assert!(size >= structure::HEADER_SIZE, "Message too short");
                 println!("Received {} bytes from {}", size, source);
+                assert!(size >= structure::HEADER_SIZE, "Message too short");
 
                 let header = structure::Header::from_bytes(&buf[0..3]);
                 if header.qr == structure::RESPONSE {
@@ -28,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("Not an endpoint query");
                     continue;
                 }
-                match query::query_handle(&buf, &header.opcode, &mut wg) {
+                match query::query_handle(&buf[..size], &header.opcode, &mut wg) {
                     Err(e) => {
                         println!("Error handling query: {}", e);
                         continue;
@@ -43,7 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         let header_bytes = response_header.to_bytes();
                         match response_body.to_bytes() {
                             structure::EndpointBytes::V4(ip) => {
-                                let mut bytes = [0; (6 + 4)];
+                                let mut bytes = [0; (7 + 4)];
                                 bytes[..4].copy_from_slice(&header_bytes);
                                 bytes[4..].copy_from_slice(&ip);
                                 udp_socket
@@ -51,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     .expect("Failed to send response");
                             }
                             structure::EndpointBytes::V6(ip) => {
-                                let mut bytes = [0; (18 + 4)];
+                                let mut bytes = [0; (19 + 4)];
                                 bytes[..4].copy_from_slice(&header_bytes);
                                 bytes[4..].copy_from_slice(&ip);
                                 udp_socket
